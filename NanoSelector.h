@@ -1005,12 +1005,17 @@ public :
    TTreeReaderValue<Bool_t> Flag_METFilters = {fReader, "Flag_METFilters"};
 
    bool isRealData_{false};
-   TH1D * mass_ee_;
-   TH1D * mass_em_;
-   TH1D * mass_mm_;
-   TH2D * lepPt_ee_;
-   TH2D * lepPt_em_;
-   TH2D * lepPt_mm_;
+   TH2F * eleCorr_;
+   TH2F * muCorr_;
+   TH1D * puCorr_;
+
+   TH1D * sumw_{nullptr};
+   TH1D * mass_ee_{nullptr};
+   TH1D * mass_em_{nullptr};
+   TH1D * mass_mm_{nullptr};
+   TH2D * lepPt_ee_{nullptr};
+   TH2D * lepPt_em_{nullptr};
+   TH2D * lepPt_mm_{nullptr};
 
    NanoSelector(TTree * /*tree*/ =0);
    virtual ~NanoSelector() { }

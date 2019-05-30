@@ -32,6 +32,7 @@
 
 NanoSelector::NanoSelector(TTree*)
 {
+   sumw_ = new TH1D("sumw", "sum weights", 1, 0, 1);
    mass_ee_ = new TH1D("mass_ee", "mass;M_{ll} [GeV];Counts", 120, 0., 120.);
    mass_em_ = new TH1D("mass_em", "mass;M_{ll} [GeV];Counts", 120, 0., 120.);
    mass_mm_ = new TH1D("mass_mm", "mass;M_{ll} [GeV];Counts", 120, 0., 120.);
@@ -39,6 +40,7 @@ NanoSelector::NanoSelector(TTree*)
    lepPt_em_ = new TH2D("lepPt_em", "LepPt;Leading p_{T}^{l} [GeV];Trailing p_{T}^{l} [GeV];Counts", 50, 0., 500., 50, 0., 500.);
    lepPt_mm_ = new TH2D("lepPt_mm", "LepPt;Leading p_{T}^{l} [GeV];Trailing p_{T}^{l} [GeV];Counts", 50, 0., 500., 50, 0., 500.);
 
+   fOutput->Add(sumw_);
    fOutput->Add(mass_ee_);
    fOutput->Add(mass_em_);
    fOutput->Add(mass_mm_);
@@ -54,6 +56,11 @@ void NanoSelector::Begin(TTree * /*tree*/)
    // The tree argument is deprecated (on PROOF 0 is passed).
 
    TString option = GetOption();
+
+   eleCorr_ = (TH2F*) GetInputList()->FindObject("scalefactors_Tight_Electron");
+   if ( eleCorr_ == nullptr ) {
+     Abort("Missing electron correction scale factor");
+   }
 }
 
 void NanoSelector::SlaveBegin(TTree * /*tree*/)
@@ -86,11 +93,14 @@ Bool_t NanoSelector::Process(Long64_t entry)
 
    fReader.SetEntry(entry);
 
-    double weight = 1.;
-    if ( !isRealData_ ) {
-       weight *= *genWeight;
-       // weight *= puCorr_->GetBinContent(puCorr_->FindBin(Pileup_nTrueInt));
-    }
+   double weight = 1.;
+   if ( !isRealData_ ) {
+      weight *= *genWeight;
+      sumw_->Fill(0., *genWeight);
+      if ( puCorr_ != nullptr ) {
+        weight *= puCorr_->GetBinContent(puCorr_->FindBin(*Pileup_nTrueInt));
+      }
+   }
 
    TLorentzVector lep1, lep2;
    int lep1_id{0}, lep2_id{0};
@@ -100,11 +110,11 @@ Bool_t NanoSelector::Process(Long64_t entry)
          if (lep1_id==0) {
             lep1.SetPtEtaPhiM(Electron_pt[iEl], Electron_eta[iEl], Electron_phi[iEl], Electron_mass[iEl]);
             lep1_id = Electron_pdgId[iEl];
-            // if (!isRealData_) weight *= eleCorr_->GetBinContent(eleCorr_->FindBin(Electron_eta[iEl], Electron_pt[iEl]));
+            if (!isRealData_) weight *= eleCorr_->GetBinContent(eleCorr_->FindBin(Electron_eta[iEl], Electron_pt[iEl]));
          } else if (lep2_id==0) {
             lep2.SetPtEtaPhiM(Electron_pt[iEl], Electron_eta[iEl], Electron_phi[iEl], Electron_mass[iEl]);
             lep2_id = Electron_pdgId[iEl];
-            // if (!isRealData_) weight *= eleCorr_->GetBinContent(eleCorr_->FindBin(Electron_eta[iEl], Electron_pt[iEl]));
+            if (!isRealData_) weight *= eleCorr_->GetBinContent(eleCorr_->FindBin(Electron_eta[iEl], Electron_pt[iEl]));
          } else {
             // too many leptons
             return kTRUE;
@@ -117,11 +127,11 @@ Bool_t NanoSelector::Process(Long64_t entry)
          if (lep1_id==0) {
             lep1.SetPtEtaPhiM(Muon_pt[iMu], Muon_eta[iMu], Muon_phi[iMu], Muon_mass[iMu]);
             lep1_id = Muon_pdgId[iMu];
-            // if (!isRealData_) weight *= muCorr_->GetBinContent(muCorr_->FindBin(std::abs(Muon_eta[iMu]), Muon_pt[iMu]));
+            if (!isRealData_) weight *= muCorr_->GetBinContent(muCorr_->FindBin(std::abs(Muon_eta[iMu]), Muon_pt[iMu]));
          } else if (lep2_id==0) {
             lep2.SetPtEtaPhiM(Muon_pt[iMu], Muon_eta[iMu], Muon_phi[iMu], Muon_mass[iMu]);
             lep2_id = Muon_pdgId[iMu];
-            // if (!isRealData_) weight *= muCorr_->GetBinContent(muCorr_->FindBin(std::abs(Muon_eta[iMu]), Muon_pt[iMu]));
+            if (!isRealData_) weight *= muCorr_->GetBinContent(muCorr_->FindBin(std::abs(Muon_eta[iMu]), Muon_pt[iMu]));
          } else {
             // too many leptons
             return kTRUE;
