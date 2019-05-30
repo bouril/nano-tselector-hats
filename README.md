@@ -8,7 +8,7 @@ There is some [documentation](https://root.cern.ch/developing-tselector) about b
 but it mostly boils down to opening an example file from the collection of files you want to process,
 and calling `MakeSelector` [doc](https://root.cern.ch/doc/master/classTTree.html#abe2c6509820373c42a88f343434cbcb4) on the tree of interest, e.g.:
 ```
-root -l data/0AF48D09-3686-E811-8187-00000086FE80.root
+root -l
 auto file0_ = TFile::Open("root://cmseos.fnal.gov//store/mc/RunIIFall17NanoAOD/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/50000/7C2B491C-BCAB-E811-88A2-002590DE6E5E.root");
 auto Events = (TTree*) file0_->Get("Events");
 Events->MakeSelector("NanoSelector");
