@@ -21,19 +21,5 @@
             "data/EA60F185-50A3-E811-8AC2-008CFA1113FC.root"
         ],
         "xs": 88.29
-    },
-    "DoubleEG": {
-        "files": [
-            "data/8254B705-BB44-E811-A808-FA163E95DCD9.root",
-            "data/1AFC31AA-BB44-E811-B270-FA163E46AE2E.root",
-            "data/142EA893-BC44-E811-95BB-FA163ECE9AA6.root"
-        ]
-    },
-    "DoubleMuon": {
-        "files": [
-            "data/1CEF9BDB-BC44-E811-996F-801844DF001C.root",
-            "data/6CC2B88E-C444-E811-87B6-1866DAEA7E28.root",
-            "data/B405DFEE-BC44-E811-A346-FA163EA1976B.root"
-        ]
     }
 }

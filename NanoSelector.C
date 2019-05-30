@@ -30,6 +30,23 @@
 #include <TStyle.h>
 #include <TLorentzVector.h>
 
+NanoSelector::NanoSelector(TTree*)
+{
+   mass_ee_ = new TH1D("mass_ee", "mass;M_{ll} [GeV];Counts", 120, 0., 120.);
+   mass_em_ = new TH1D("mass_em", "mass;M_{ll} [GeV];Counts", 120, 0., 120.);
+   mass_mm_ = new TH1D("mass_mm", "mass;M_{ll} [GeV];Counts", 120, 0., 120.);
+   lepPt_ee_ = new TH2D("lepPt_ee", "LepPt;Leading p_{T}^{l} [GeV];Trailing p_{T}^{l} [GeV];Counts", 50, 0., 500., 50, 0., 500.);
+   lepPt_em_ = new TH2D("lepPt_em", "LepPt;Leading p_{T}^{l} [GeV];Trailing p_{T}^{l} [GeV];Counts", 50, 0., 500., 50, 0., 500.);
+   lepPt_mm_ = new TH2D("lepPt_mm", "LepPt;Leading p_{T}^{l} [GeV];Trailing p_{T}^{l} [GeV];Counts", 50, 0., 500., 50, 0., 500.);
+
+   fOutput->Add(mass_ee_);
+   fOutput->Add(mass_em_);
+   fOutput->Add(mass_mm_);
+   fOutput->Add(lepPt_ee_);
+   fOutput->Add(lepPt_em_);
+   fOutput->Add(lepPt_mm_);
+}
+
 void NanoSelector::Begin(TTree * /*tree*/)
 {
    // The Begin() function is called at the start of the query.
@@ -69,9 +86,14 @@ Bool_t NanoSelector::Process(Long64_t entry)
 
    fReader.SetEntry(entry);
 
+    double weight = 1.;
+    if ( !isRealData_ ) {
+       weight *= *genWeight;
+       // weight *= puCorr_->GetBinContent(puCorr_->FindBin(Pileup_nTrueInt));
+    }
+
    TLorentzVector lep1, lep2;
    int lep1_id{0}, lep2_id{0};
-   bool tooManyLep = false;
 
    for(UInt_t iEl=0; iEl < *nElectron; ++iEl) {
       if (Electron_pt[iEl] > 20. && std::abs(Electron_eta[iEl]) < 2.5 && Electron_cutBased[iEl] >= 4 && Electron_pfRelIso03_all[iEl] < 0.15 * Electron_pt[iEl] ) {
@@ -84,9 +106,46 @@ Bool_t NanoSelector::Process(Long64_t entry)
             lep2_id = Electron_pdgId[iEl];
             // if (!isRealData_) weight *= eleCorr_->GetBinContent(eleCorr_->FindBin(Electron_eta[iEl], Electron_pt[iEl]));
          } else {
-            tooManyLep = true;
+            // too many leptons
+            return kTRUE;
          }
       }
+   }
+
+   for(UInt_t iMu=0; iMu < *nMuon; ++iMu) {
+      if (Muon_pt[iMu] > 20. && std::abs(Muon_eta[iMu]) < 2.4 && Muon_tightId[iMu] > 0 && Muon_pfRelIso04_all[iMu] < 0.15 * Muon_pt[iMu] ) {
+         if (lep1_id==0) {
+            lep1.SetPtEtaPhiM(Muon_pt[iMu], Muon_eta[iMu], Muon_phi[iMu], Muon_mass[iMu]);
+            lep1_id = Muon_pdgId[iMu];
+            // if (!isRealData_) weight *= muCorr_->GetBinContent(muCorr_->FindBin(std::abs(Muon_eta[iMu]), Muon_pt[iMu]));
+         } else if (lep2_id==0) {
+            lep2.SetPtEtaPhiM(Muon_pt[iMu], Muon_eta[iMu], Muon_phi[iMu], Muon_mass[iMu]);
+            lep2_id = Muon_pdgId[iMu];
+            // if (!isRealData_) weight *= muCorr_->GetBinContent(muCorr_->FindBin(std::abs(Muon_eta[iMu]), Muon_pt[iMu]));
+         } else {
+            // too many leptons
+            return kTRUE;
+         }
+      }
+   }
+
+   if ( lep2.Pt() > lep1.Pt() ) {
+      std::swap(lep1, lep2);
+      std::swap(lep1_id, lep2_id);
+   }
+   TLorentzVector zcand = lep1 + lep2;
+
+   if ( lep1_id*lep2_id == -11*11 && lep1.Pt() > 25. ) {
+      mass_ee_->Fill(zcand.M(), weight);
+      lepPt_ee_->Fill(lep1.Pt(), lep2.Pt(), weight);
+   }
+   else if ( lep1_id*lep2_id == -11*13 ) {
+      mass_em_->Fill(zcand.M(), weight);
+      lepPt_em_->Fill(lep1.Pt(), lep2.Pt(), weight);
+   }
+   else if ( lep1_id*lep2_id == -13*13 ) {
+      mass_mm_->Fill(zcand.M(), weight);
+      lepPt_mm_->Fill(lep1.Pt(), lep2.Pt(), weight);
    }
 
    return kTRUE;

@@ -17,6 +17,7 @@
 #include <TTreeReaderArray.h>
 
 // Headers needed by this particular selector
+#include <TH2.h>
 
 
 class NanoSelector : public TSelector {
@@ -1003,8 +1004,15 @@ public :
    TTreeReaderValue<Bool_t> Flag_trkPOG_logErrorTooManyClusters = {fReader, "Flag_trkPOG_logErrorTooManyClusters"};
    TTreeReaderValue<Bool_t> Flag_METFilters = {fReader, "Flag_METFilters"};
 
+   bool isRealData_{false};
+   TH1D * mass_ee_;
+   TH1D * mass_em_;
+   TH1D * mass_mm_;
+   TH2D * lepPt_ee_;
+   TH2D * lepPt_em_;
+   TH2D * lepPt_mm_;
 
-   NanoSelector(TTree * /*tree*/ =0) { }
+   NanoSelector(TTree * /*tree*/ =0);
    virtual ~NanoSelector() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
