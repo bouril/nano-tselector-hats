@@ -2,7 +2,7 @@ This is a short and quick example of using a TSelector to process NanoAOD,
 and how it can be scaled out on condor.  There are many ways to accomplish
 such a task--here I present just *one*.  Some components are common to any
 solution: a core event processor, a steering framework, a metadata
-repository, and an interface to large compute resources.  
+database, a non-event data repository, and an interface to large compute resources.  
 
 There is some [documentation](https://root.cern.ch/developing-tselector) about building a TSelector,
 but it mostly boils down to opening an example file from the collection of files you want to process,
