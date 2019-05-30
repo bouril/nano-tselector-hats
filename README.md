@@ -1,5 +1,8 @@
 This is a short and quick example of using a TSelector to process NanoAOD,
-and how it can be scaled out on condor.
+and how it can be scaled out on condor.  There are many ways to accomplish
+such a task--here I present just *one*.  Some components are common to any
+solution: a core event processor, a steering framework, a metadata
+repository, and an interface to large compute resources.  
 
 There is some [documentation](https://root.cern.ch/developing-tselector) about building a TSelector,
 but it mostly boils down to opening an example file from the collection of files you want to process,
@@ -15,7 +18,7 @@ This is how the selector in this repository was created.
 
 Sadly, to run over collections of files that have different tree structure (e.g. data vs. MC, which have different branches),
 one would have to disable some branches.  The perfect function, `TTreeReader::DeregisterValueReader`, is a [protected member function](https://root.cern.ch/doc/v608/classTTreeReader.html#ab9df60de0ade744cb2d5ef423cd12aec).
-I don't know why, but I plan to ask.  There are a few workarounds, one is to have one selector for data and one for MC, having them call a common external function.
+I don't know why, but I plan to ask.  There are a few workarounds, one is to have one selector for data and one for MC, having them call a common external function.  Another is to use `MakeClass`, which gives more manual control over branch loading, but comes at a heavy cost for NanoAOD, where the array sizes become hardcoded.
 Keep in mind that all `TTreeReaderValue` and `TTreeReaderArray` objects are public members of the selector, so you can just pass your selector by reference to external
 functions, and they can access all the variables.
 
