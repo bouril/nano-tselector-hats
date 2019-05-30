@@ -30,7 +30,6 @@ def setup_samplelist(args):
     else:
         samples = samples_in
 
-    print(samples)
     return samples
 
 
@@ -40,7 +39,7 @@ def setup_selector(args, selector, dataset, info):
 
     # We can send any object inheiriting from TObject into the selector
     # A corresponding receive function has to be implemented in TSelector::Begin()
-    fin = ROOT.TFile.Open("electron_scalefactors.root")
+    fin = ROOT.TFile.Open("corrections/electron_scalefactors.root")
     electronSF = fin.Get("scalefactors_Tight_Electron")
     electronSF.SetDirectory(0)  # Prevent cleanup when file closed
     inputs.Add(electronSF)
@@ -48,12 +47,12 @@ def setup_selector(args, selector, dataset, info):
     # We can also simply modify any public members of the selector from python
     selector.isRealData_ = False
 
-    fin = ROOT.TFile.Open("muon_scalefactors.root")
+    fin = ROOT.TFile.Open("corrections/muon_scalefactors.root")
     muonSF = fin.Get("scalefactors_Iso_MuonTightId")
     muonSF.SetDirectory(0)
     selector.muCorr_ = muonSF
 
-    fin = ROOT.TFile.Open("pileup_scalefactors.root")
+    fin = ROOT.TFile.Open("corrections/pileup_scalefactors.root")
     # Suppose we are looking at the buggy 2017 MC and need per-dataset pileup SF
     pileupSF = fin.Get(dataset)
     if pileupSF != None:

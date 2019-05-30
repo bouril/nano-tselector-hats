@@ -1,0 +1,19 @@
+universe = vanilla
+
+Name = nanoselector
+Selector = NanoSelector
+Sample = datadef_nano.json
+NJobs = 3
+
+# If the corrections directory is large, alternative mechanisms for transfer
+# should be used.  Consult your local cluster admin for best practice, it varies by site
+# Any other inputs (such as extra sources) would have to be added here
+transfer_input_files = driver.py, $(Selector).C, $(Selector).h, $(Sample), corrections
+
+Executable = wrapper.sh
+Arguments = --sample $(Sample) --split $(NJobs) $(Process) --output output_$(Process).root
+Output = $(Name).$(Process).stdout
+Error = $(Name).$(Process).stderr
+Log = $(Name).$(Process).log
+
+queue $(NJobs)

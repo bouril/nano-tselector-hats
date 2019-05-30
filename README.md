@@ -18,3 +18,18 @@ one would have to disable some branches.  The perfect function, `TTreeReader::De
 I don't know why, but I plan to ask.  There are a few workarounds, one is to have one selector for data and one for MC, having them call a common external function.
 Keep in mind that all `TTreeReaderValue` and `TTreeReaderArray` objects are public members of the selector, so you can just pass your selector by reference to external
 functions, and they can access all the variables.
+
+To steer the selector behavior, it is much easier to work in python.  The `driver.py` executable configures the selector and runs it on
+a list of samples, as specified by the user in `datadef_nano.json`.  JSON is a convenient way to encode the necessary metadata, although
+it can be annoying to maintain.  Helper scripts can be written in python to make this JSON creation a bit less burdensome.
+
+To wrap the selector on condor, I've created a `wrapper.sh` that provides a basic ROOT+python 3 environment from LCG.
+You can source this environment from any machine with access to cvmfs,
+```bash
+source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc62-opt/setup.sh
+```
+
+Lastly, there is `submit.jdl`, which can be passed to `condor_submit`.  Here, one specifies what arguments to pass to the driver script.
+After all is done, you should have a few `output_*.root` files that can be `hadd`-ed to complete the operation.
+
+And that's how you scale out the old-fashioned way.

@@ -1,3 +1,7 @@
 *_C.*
 *.pcm
 data
+*.log
+*.stderr
+*.stdout
+*.root
